@@ -1,0 +1,95 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Bot (Mock)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.bot.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "mock",
+        "DATABASE_URL": "sqlite+aiosqlite:///./mock.db"
+      }
+    },
+    {
+      "name": "Debug Bot (Gemini)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.bot.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "gemini"
+      }
+    },
+    {
+      "name": "Debug Bot (GPT)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.bot.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "gpt"
+      }
+    },
+    {
+      "name": "Debug Worker (Mock)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.worker.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "mock"
+      }
+    },
+    {
+      "name": "Debug Worker (Gemini)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.worker.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "gemini"
+      }
+    },
+    {
+      "name": "Debug Worker (GPT)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.worker.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "gpt"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug All (Mock)",
+      "configurations": [
+        "Debug Bot (Mock)",
+        "Debug Worker (Mock)"
+      ]
+    },
+    {
+      "name": "Debug All (Gemini)",
+      "configurations": [
+        "Debug Bot (Gemini)",
+        "Debug Worker (Gemini)"
+      ]
+    },
+    {
+      "name": "Debug All (GPT)",
+      "configurations": [
+        "Debug Bot (GPT)",
+        "Debug Worker (GPT)"
+      ]
+    }
+  ]
+}
