@@ -12,6 +12,7 @@ dependencies = [
     "google-genai>=1.56.0",
     "injector>=0.22.0",
     "mcp>=1.25.0",
+    "ollama>=0.6.1",
     "openai>=2.14.0",
     "pyright>=1.1.407",
     "python-dotenv>=1.2.1",

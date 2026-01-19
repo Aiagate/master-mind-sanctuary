@@ -32,6 +32,7 @@ class MyBot(commands.Bot):
         from app.bot.cogs.brain_cog import BrainCog
         from app.bot.cogs.chat_cog import ChatCog
         from app.bot.cogs.dm_response_cog import DirectMessageResponseCog
+        from app.bot.cogs.embedding_cog import EmbeddingCog
         from app.bot.cogs.subscription_cog import SubscriptionCog
         from app.bot.cogs.system_instruction_cog import SystemInstructionCog
         from app.domain.interfaces.event_bus import IEventBus
@@ -49,6 +50,7 @@ class MyBot(commands.Bot):
         await self.add_cog(DirectMessageResponseCog(self, event_bus))
         await self.add_cog(SubscriptionCog(self))
         await self.add_cog(SystemInstructionCog(self))
+        await self.add_cog(EmbeddingCog(self))
 
     async def _setup_dependencies(self) -> "Injector":
         """Initialize database and dependencies."""

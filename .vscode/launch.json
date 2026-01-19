@@ -21,7 +21,8 @@
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.local",
       "env": {
-        "AI_PROVIDER": "gemini"
+        "AI_PROVIDER": "gemini",
+        "EMBEDDING_PROVIDER": "gemini"
       }
     },
     {
@@ -32,7 +33,32 @@
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.local",
       "env": {
-        "AI_PROVIDER": "gpt"
+        "AI_PROVIDER": "gpt",
+        "EMBEDDING_PROVIDER": "gpt"
+      }
+    },
+    {
+      "name": "Debug Bot (Ollama)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.bot.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "ollama",
+        "EMBEDDING_PROVIDER": "ollama"
+      }
+    },
+    {
+      "name": "Debug Bot (Ollama OpenAI)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.bot.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "ollama-openai",
+        "EMBEDDING_PROVIDER": "ollama-openai"
       }
     },
     {
@@ -43,7 +69,8 @@
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.local",
       "env": {
-        "AI_PROVIDER": "mock"
+        "AI_PROVIDER": "mock",
+        "EMBEDDING_PROVIDER": "mock"
       }
     },
     {
@@ -54,7 +81,8 @@
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.local",
       "env": {
-        "AI_PROVIDER": "gemini"
+        "AI_PROVIDER": "gemini",
+        "EMBEDDING_PROVIDER": "gemini"
       }
     },
     {
@@ -65,7 +93,32 @@
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.local",
       "env": {
-        "AI_PROVIDER": "gpt"
+        "AI_PROVIDER": "gpt",
+        "EMBEDDING_PROVIDER": "gpt"
+      }
+    },
+    {
+      "name": "Debug Worker (Ollama)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.worker.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "ollama",
+        "EMBEDDING_PROVIDER": "ollama"
+      }
+    },
+    {
+      "name": "Debug Worker (Ollama OpenAI)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.worker.__main__",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "AI_PROVIDER": "ollama-openai",
+        "EMBEDDING_PROVIDER": "ollama-openai"
       }
     }
   ],
@@ -89,6 +142,20 @@
       "configurations": [
         "Debug Bot (GPT)",
         "Debug Worker (GPT)"
+      ]
+    },
+    {
+      "name": "Debug All (Ollama)",
+      "configurations": [
+        "Debug Bot (Ollama)",
+        "Debug Worker (Ollama)"
+      ]
+    },
+    {
+      "name": "Debug All (Ollama OpenAI)",
+      "configurations": [
+        "Debug Bot (Ollama OpenAI)",
+        "Debug Worker (Ollama OpenAI)"
       ]
     }
   ]

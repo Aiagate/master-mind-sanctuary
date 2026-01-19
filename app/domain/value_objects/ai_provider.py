@@ -10,6 +10,8 @@ class AIProvider(str, Enum):
 
     GEMINI = "Gemini"
     GPT = "GPT"
+    OLLAMA = "Ollama"
+    OLLAMA_OPENAI = "OllamaOpenAI"
     MOCK = "Mock"
 
     @classmethod
