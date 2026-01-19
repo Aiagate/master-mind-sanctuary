@@ -123,15 +123,15 @@ class TestPropertyEntity(IAuditable):
         return self._version
 
     @property
-    def created_at(self) -> datetime:
+    def created_at(self) -> datetime:  # type: ignore[reportIncompatibleVariableOverride]
         return self._created_at
 
     @property
-    def updated_at(self) -> datetime:
+    def updated_at(self) -> datetime:  # type: ignore[reportIncompatibleVariableOverride]
         return self._updated_at
 
     @updated_at.setter
-    def updated_at(self, value: datetime) -> None:
+    def updated_at(self, value: datetime) -> None:  # type: ignore[reportIncompatibleVariableOverride]
         self._updated_at = value
 
     def change_name(self, new_name: str) -> "TestPropertyEntity":

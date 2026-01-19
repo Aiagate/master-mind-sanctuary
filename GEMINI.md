@@ -18,7 +18,15 @@
   - `app/bot`: **[プレゼンテーション層]** Discord APIインターフェース。
   - `app/worker`: **[ワーカー]** バックグラウンドタスク処理。
   - `app/core`: Mediator、共通設定などの基盤機能。
-- **技術スタック**: Python 3.12+, discord.py, SQLModel (PostgreSQL), Alembic, pytest, Ruff, Pyright, uv。
+- **技術スタック**:
+  - Python 3.13
+  - discord.py
+  - SQLModel (SQLite)
+  - Alembic
+  - pytest
+  - Ruff
+  - Pyright
+  - uv
 
 ### WHY（なぜか）
 

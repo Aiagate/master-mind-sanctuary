@@ -13,10 +13,10 @@ description: コードの実装の後やコミットを行う前に、コード�
 
 ```bash
 # コードのフォーマット
-uv run ruff format .
+uv run --frozen ruff format .
 
 # リントチェックと自動修正
-uv run ruff check . --fix
+uv run --frozen ruff check . --fix
 ```
 
 ## 2. 型チェック (Pyright)
@@ -24,7 +24,7 @@ uv run ruff check . --fix
 Pythonの型ヒントに基づき、厳密な型チェックを行います。
 
 ```bash
-uv run pyright
+uv run --frozen pyright
 ```
 
 ## 3. テスト実行 (Pytest)
@@ -32,7 +32,7 @@ uv run pyright
 変更が既存の機能を壊していないか、単体テストを実行して確認します。
 
 ```bash
-uv run pytest
+uv run --frozen pytest
 ```
 
 ## エラーが発生した場合

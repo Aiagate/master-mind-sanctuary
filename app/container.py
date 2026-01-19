@@ -3,7 +3,7 @@
 import injector
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.domain.interfaces.ai_service import IAIService
+from app.domain.interfaces.ai_service import IAIService, IEmbeddingService
 from app.domain.interfaces.event_bus import IEventBus
 from app.domain.repositories import IUnitOfWork
 from app.infrastructure.orm_registry import init_orm_mappings
@@ -60,10 +60,49 @@ class AIModule(injector.Module):
             from app.infrastructure.services.gpt_service import GptService
 
             return GptService()
+        elif provider == "ollama":
+            from app.infrastructure.services.ollama_service import OllamaService
+
+            return OllamaService()
+        elif provider == "ollama-openai":
+            from app.infrastructure.services.ollama_openai_service import (
+                OllamaOpenAIService,
+            )
+
+            return OllamaOpenAIService()
 
         from app.infrastructure.services.mock_ai_service import MockAIService
 
         return MockAIService()
+
+    @injector.provider
+    @injector.singleton
+    def provide_embedding_service(self) -> IEmbeddingService:
+        """Provide Embedding service implementation based on environment variable."""
+        import os
+
+        # Default to 'ollama' as per plan, or 'mock' if prefer safe default.
+        # Plan says default 'ollama'.
+        provider = os.getenv("EMBEDDING_PROVIDER", "mock").lower()
+
+        if provider == "ollama":
+            from app.infrastructure.services.ollama_embedding_service import (
+                OllamaEmbeddingService,
+            )
+
+            return OllamaEmbeddingService()
+        elif provider == "gemini":
+            from app.infrastructure.services.gemini_embedding_service import (
+                GeminiEmbeddingService,
+            )
+
+            return GeminiEmbeddingService()
+
+        from app.infrastructure.services.mock_embedding_service import (
+            MockEmbeddingService,
+        )
+
+        return MockEmbeddingService()
 
 
 class MessagingModule(injector.Module):

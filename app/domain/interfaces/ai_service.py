@@ -16,6 +16,16 @@ class AIServiceError(Exception):
         return self.message
 
 
+@dataclass(frozen=True)
+class EmbeddingServiceError(Exception):
+    """Represents an error from the embedding service."""
+
+    message: str
+
+    def __str__(self) -> str:
+        return self.message
+
+
 class IAIService(ABC):
     """Interface for AI service."""
 
@@ -42,6 +52,42 @@ class IAIService(ABC):
     @abstractmethod
     async def initialize_ai_agent(self) -> None:
         """Initialize AI agent (e.g. setup caching)."""
+        pass
+
+    @property
+    @abstractmethod
+    def provider(self) -> AIProvider:
+        """Get the provider type."""
+        pass
+
+
+class IEmbeddingService(ABC):
+    """Interface for embedding service."""
+
+    @abstractmethod
+    async def embed_text(self, text: str) -> Result[list[float], EmbeddingServiceError]:
+        """Generate embedding for text.
+
+        Args:
+            text: The input text.
+
+        Returns:
+            Result[list[float], EmbeddingServiceError]: generated embedding or error.
+        """
+        pass
+
+    @abstractmethod
+    async def embed_query(
+        self, query: str
+    ) -> Result[list[float], EmbeddingServiceError]:
+        """Generate embedding for query.
+
+        Args:
+            query: The input query.
+
+        Returns:
+            Result[list[float], EmbeddingServiceError]: generated embedding or error.
+        """
         pass
 
     @property
