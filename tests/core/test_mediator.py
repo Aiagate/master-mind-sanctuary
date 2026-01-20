@@ -24,7 +24,7 @@ class AnotherQuery(Request[Result[int, Exception]]):
     pass
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_mediator_send_registered_request() -> None:
     """Test that a request with an auto-registered handler can be sent."""
     # The MyQueryHandler should be auto-registered via the metaclass
@@ -32,7 +32,7 @@ async def test_mediator_send_registered_request() -> None:
     assert result == "Handled"
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_mediator_send_unregistered_raises_error() -> None:
     """Test that sending an unregistered request raises HandlerNotFoundError."""
     with pytest.raises(

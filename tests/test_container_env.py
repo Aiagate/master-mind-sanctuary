@@ -1,5 +1,5 @@
 import os
-from unittest import mock
+from typing import Any
 
 import injector
 import pytest
@@ -16,41 +16,41 @@ def container():
     return injector.Injector([AIModule()])
 
 
-def test_ai_provider_default_is_mock():
+def test_ai_provider_default_is_mock(mocker: Any):
     """Test that the default AI provider is MockAIService."""
-    with mock.patch.dict(os.environ, {}, clear=True):
-        container = injector.Injector([AIModule()])
-        ai_service = container.get(IAIService)
-        assert isinstance(ai_service, MockAIService)
+    mocker.patch.dict(os.environ, {}, clear=True)
+    container = injector.Injector([AIModule()])
+    ai_service = container.get(IAIService)
+    assert isinstance(ai_service, MockAIService)
 
 
-def test_ai_provider_gemini():
+def test_ai_provider_gemini(mocker: Any):
     """Test that setting AI_PROVIDER to 'gemini' uses GeminiService."""
-    with mock.patch.dict(os.environ, {"AI_PROVIDER": "gemini"}):
-        container = injector.Injector([AIModule()])
-        ai_service = container.get(IAIService)
-        assert isinstance(ai_service, GeminiService)
+    mocker.patch.dict(os.environ, {"AI_PROVIDER": "gemini"})
+    container = injector.Injector([AIModule()])
+    ai_service = container.get(IAIService)
+    assert isinstance(ai_service, GeminiService)
 
 
-def test_ai_provider_gpt():
+def test_ai_provider_gpt(mocker: Any):
     """Test that setting AI_PROVIDER to 'gpt' uses GptService."""
-    with mock.patch.dict(os.environ, {"AI_PROVIDER": "gpt"}):
-        container = injector.Injector([AIModule()])
-        ai_service = container.get(IAIService)
-        assert isinstance(ai_service, GptService)
+    mocker.patch.dict(os.environ, {"AI_PROVIDER": "gpt"})
+    container = injector.Injector([AIModule()])
+    ai_service = container.get(IAIService)
+    assert isinstance(ai_service, GptService)
 
 
-def test_ai_provider_openai():
+def test_ai_provider_openai(mocker: Any):
     """Test that setting AI_PROVIDER to 'openai' uses GptService."""
-    with mock.patch.dict(os.environ, {"AI_PROVIDER": "openai"}):
-        container = injector.Injector([AIModule()])
-        ai_service = container.get(IAIService)
-        assert isinstance(ai_service, GptService)
+    mocker.patch.dict(os.environ, {"AI_PROVIDER": "openai"})
+    container = injector.Injector([AIModule()])
+    ai_service = container.get(IAIService)
+    assert isinstance(ai_service, GptService)
 
 
-def test_ai_provider_unknown_defaults_to_mock():
+def test_ai_provider_unknown_defaults_to_mock(mocker: Any):
     """Test that an unknown AI_PROVIDER defaults to MockAIService."""
-    with mock.patch.dict(os.environ, {"AI_PROVIDER": "unknown_provider"}):
-        container = injector.Injector([AIModule()])
-        ai_service = container.get(IAIService)
-        assert isinstance(ai_service, MockAIService)
+    mocker.patch.dict(os.environ, {"AI_PROVIDER": "unknown_provider"})
+    container = injector.Injector([AIModule()])
+    ai_service = container.get(IAIService)
+    assert isinstance(ai_service, MockAIService)

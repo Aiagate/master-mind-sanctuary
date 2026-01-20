@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from typing import Any
 
 import pytest
 
@@ -11,41 +11,42 @@ from app.usecases.system.handle_heartbeat import (
 
 
 @pytest.fixture
-def mock_event_bus():
-    return AsyncMock(spec=IEventBus)
+def mock_event_bus(mocker: Any):
+    return mocker.AsyncMock(spec=IEventBus)
 
 
 @pytest.mark.asyncio
 class TestHandleHeartbeatHandler:
     @pytest.mark.skip(reason="Logic disabled in implementation")
-    async def test_handle_heartbeat_skip_random(self, mock_event_bus: AsyncMock):
+    async def test_handle_heartbeat_skip_random(self, mock_event_bus: Any, mocker: Any):
         handler = HandleHeartbeatHandler(mock_event_bus)
 
         # Mock random to return > 0.3 (should skip)
-        with patch("random.random", return_value=0.4):
-            result = await handler.handle(HandleHeartbeatCommand())
+        mocker.patch("random.random", return_value=0.4)
+        result = await handler.handle(HandleHeartbeatCommand())
 
         assert is_ok(result)
         mock_event_bus.publish.assert_not_called()
 
-    async def test_handle_heartbeat_trigger_success(self, mock_event_bus: AsyncMock):
+    async def test_handle_heartbeat_trigger_success(
+        self, mock_event_bus: Any, mocker: Any
+    ):
         handler = HandleHeartbeatHandler(mock_event_bus)
 
         # Mock random (<= 0.3) and Mediator
-        with (
-            patch("random.random", return_value=0.2),
-            patch(
-                "app.core.mediator.Mediator.send_async", new_callable=AsyncMock
-            ) as mock_send,
-        ):
-            # Setup Mediator success response
-            from app.usecases.chat.spontaneous_dialog import SpontaneousDialogResult
+        mocker.patch("random.random", return_value=0.2)
+        mock_send = mocker.patch(
+            "app.core.mediator.Mediator.send_async", new_callable=mocker.AsyncMock
+        )
 
-            mock_send.return_value = Ok(
-                SpontaneousDialogResult(content="Hello World", channel_id="123456")
-            )
+        # Setup Mediator success response
+        from app.usecases.chat.spontaneous_dialog import SpontaneousDialogResult
 
-            result = await handler.handle(HandleHeartbeatCommand())
+        mock_send.return_value = Ok(
+            SpontaneousDialogResult(content="Hello World", channel_id="123456")
+        )
+
+        result = await handler.handle(HandleHeartbeatCommand())
 
         assert is_ok(result)
         mock_send.assert_called_once()  # Should call SpontaneousDialogCommand
@@ -53,24 +54,25 @@ class TestHandleHeartbeatHandler:
             "bot.speak", {"content": "Hello World", "channel_id": "123456"}
         )
 
-    async def test_handle_heartbeat_trigger_failure(self, mock_event_bus: AsyncMock):
+    async def test_handle_heartbeat_trigger_failure(
+        self, mock_event_bus: Any, mocker: Any
+    ):
         handler = HandleHeartbeatHandler(mock_event_bus)
 
         # Mock random (<= 0.3) and Mediator
-        with (
-            patch("random.random", return_value=0.2),
-            patch(
-                "app.core.mediator.Mediator.send_async", new_callable=AsyncMock
-            ) as mock_send,
-        ):
-            # Setup Mediator failure response (Err)
-            # We need to simulate an error result from SpontaneousDialogCommand
-            from app.core.result import Err
-            from app.usecases.result import ErrorType, UseCaseError
+        mocker.patch("random.random", return_value=0.2)
+        mock_send = mocker.patch(
+            "app.core.mediator.Mediator.send_async", new_callable=mocker.AsyncMock
+        )
 
-            mock_send.return_value = Err(UseCaseError(ErrorType.UNEXPECTED, "Fail"))
+        # Setup Mediator failure response (Err)
+        # We need to simulate an error result from SpontaneousDialogCommand
+        from app.core.result import Err
+        from app.usecases.result import ErrorType, UseCaseError
 
-            result = await handler.handle(HandleHeartbeatCommand())
+        mock_send.return_value = Err(UseCaseError(ErrorType.UNEXPECTED, "Fail"))
+
+        result = await handler.handle(HandleHeartbeatCommand())
 
         assert is_ok(result)  # Handler itself succeeds even if sub-command fails
         mock_event_bus.publish.assert_not_called()

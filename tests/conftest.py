@@ -2,7 +2,7 @@
 
 from collections.abc import AsyncGenerator
 
-import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 
@@ -18,7 +18,7 @@ init_orm_mappings()
 register_test_mappings()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def test_db_engine() -> AsyncGenerator[None, None]:
     """Create test database engine with in-memory SQLite."""
     test_url = "sqlite+aiosqlite:///:memory:"
@@ -47,7 +47,7 @@ async def test_db_engine() -> AsyncGenerator[None, None]:
     await engine.dispose()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def session_factory(
     test_db_engine: None,
 ) -> async_sessionmaker[AsyncSession]:
@@ -59,13 +59,7 @@ async def session_factory(
     return database._session_factory
 
 
-@pytest.fixture(scope="function")
-def anyio_backend() -> str:
-    """Specify anyio backend for pytest-anyio."""
-    return "asyncio"
-
-
-@pytest.fixture
+@pytest_asyncio.fixture
 async def uow(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> IUnitOfWork:

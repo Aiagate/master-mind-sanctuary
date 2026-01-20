@@ -1,6 +1,6 @@
 """Tests for CreateSystemInstruction use case."""
 
-from unittest.mock import AsyncMock, Mock
+from typing import Any
 
 import pytest
 
@@ -16,7 +16,7 @@ from app.usecases.system_instructions.create_system_instruction import (
 )
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_create_system_instruction_basic(uow: IUnitOfWork):
     """Test creating a simple system instruction."""
     handler = CreateSystemInstructionHandler(uow)
@@ -40,7 +40,7 @@ async def test_create_system_instruction_basic(uow: IUnitOfWork):
         assert not saved_instr.is_active
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_create_system_instruction_active_switches_existing(uow: IUnitOfWork):
     """Test creating an active instruction switches off the existing one."""
     # Setup existing active instruction
@@ -83,7 +83,7 @@ async def test_create_system_instruction_active_switches_existing(uow: IUnitOfWo
         assert fetched_new.instruction == "New Instruction"
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_create_system_instruction_invalid_provider(uow: IUnitOfWork):
     """Test handling of invalid provider string."""
     handler = CreateSystemInstructionHandler(uow)
@@ -101,19 +101,19 @@ async def test_create_system_instruction_invalid_provider(uow: IUnitOfWork):
     assert "Invalid AI provider" in str(result.error)
 
 
-@pytest.mark.anyio
-async def test_create_system_instruction_repo_error(uow: IUnitOfWork):
+@pytest.mark.asyncio
+async def test_create_system_instruction_repo_error(uow: IUnitOfWork, mocker: Any):
     """Test handling of repository errors during save."""
     # Create mock UoW and Repo
-    mock_uow = Mock(spec=IUnitOfWork)
-    mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
-    mock_uow.__aexit__ = AsyncMock(return_value=None)
-    mock_uow.commit = AsyncMock()
+    mock_uow = mocker.Mock(spec=IUnitOfWork)
+    mock_uow.__aenter__ = mocker.AsyncMock(return_value=mock_uow)
+    mock_uow.__aexit__ = mocker.AsyncMock(return_value=None)
+    mock_uow.commit = mocker.AsyncMock()
 
-    mock_repo = Mock()
+    mock_repo = mocker.Mock()
     # Mock save to return error
     error = RepositoryError(RepositoryErrorType.UNEXPECTED, "DB Error")
-    mock_repo.save = AsyncMock(return_value=Err(error))
+    mock_repo.save = mocker.AsyncMock(return_value=Err(error))
     # Mock find_active_by_provider (needed for is_active checks, even if False is passed it might not be called,
     # but if CreateSystemInstructionHandler checks it only when True.
     # Let's assume is_active=False for simplicity in this error case)

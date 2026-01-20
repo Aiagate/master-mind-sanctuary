@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, Mock
+from typing import Any
 
 import pytest
 
@@ -14,7 +14,7 @@ from app.usecases.system_instructions.change_active_instruction import (
 )
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_change_active_instruction(uow: IUnitOfWork):
     """Test switching active system instruction."""
     handler = ChangeActiveSystemInstructionHandler(uow)
@@ -59,7 +59,7 @@ async def test_change_active_instruction(uow: IUnitOfWork):
         assert fetched_instr2.is_active
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_change_active_instruction_not_found(uow: IUnitOfWork):
     """Test trying to activate non-existent instruction."""
     handler = ChangeActiveSystemInstructionHandler(uow)
@@ -75,16 +75,16 @@ async def test_change_active_instruction_not_found(uow: IUnitOfWork):
     assert "not found" in str(result.error)
 
 
-@pytest.mark.anyio
-async def test_change_active_instruction_repo_error(uow: IUnitOfWork):
+@pytest.mark.asyncio
+async def test_change_active_instruction_repo_error(uow: IUnitOfWork, mocker: Any):
     """Test repository error during fetch."""
-    mock_uow = Mock(spec=IUnitOfWork)
-    mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
-    mock_uow.__aexit__ = AsyncMock(return_value=None)
+    mock_uow = mocker.Mock(spec=IUnitOfWork)
+    mock_uow.__aenter__ = mocker.AsyncMock(return_value=mock_uow)
+    mock_uow.__aexit__ = mocker.AsyncMock(return_value=None)
 
-    mock_repo = Mock()
+    mock_repo = mocker.Mock()
     error = RepositoryError(RepositoryErrorType.UNEXPECTED, "DB Connection Fail")
-    mock_repo.find_by_id = AsyncMock(return_value=Err(error))
+    mock_repo.find_by_id = mocker.AsyncMock(return_value=Err(error))
 
     mock_uow.GetRepository.return_value = mock_repo
 

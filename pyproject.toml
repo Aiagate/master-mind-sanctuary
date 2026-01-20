@@ -30,7 +30,6 @@ start-worker = "app.worker.__main__:main"
 [dependency-groups]
 dev = [
     "aiosqlite>=0.21.0",
-    "anyio>=4.11.0",
     "freezegun>=1.5.5",
     "pre-commit>=4.5.0",
     "pyright>=1.1.407",

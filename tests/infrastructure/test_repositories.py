@@ -10,7 +10,7 @@ from app.domain.repositories import IUnitOfWork
 from tests.infrastructure.helpers import TestEntity, TestId
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_repository_get_non_existent_raises_error(uow: IUnitOfWork) -> None:
     """Test that getting a non-existent entity returns an Err."""
     async with uow:
@@ -23,7 +23,7 @@ async def test_repository_get_non_existent_raises_error(uow: IUnitOfWork) -> Non
         assert is_err(result)
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_repository_delete(uow: IUnitOfWork) -> None:
     """Test deleting an entity via the repository."""
     user = TestEntity.create(
@@ -57,7 +57,7 @@ async def test_repository_delete(uow: IUnitOfWork) -> None:
         assert isinstance(get_result, Err)
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_repository_saves_timestamps(uow: IUnitOfWork) -> None:
     """Test that repository correctly saves and retrieves timestamps."""
     before_creation = datetime.now(UTC)
@@ -83,7 +83,7 @@ async def test_repository_saves_timestamps(uow: IUnitOfWork) -> None:
     assert saved_user.updated_at <= after_creation
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_repository_updates_timestamp_on_save(uow: IUnitOfWork) -> None:
     """Test that updated_at is automatically updated when saving existing entity."""
     user = TestEntity.create(

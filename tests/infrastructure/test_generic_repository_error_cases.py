@@ -1,9 +1,9 @@
 """Tests for GenericRepository error cases to improve coverage."""
 
 from dataclasses import dataclass
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from pytest_mock import MockerFixture
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -15,7 +15,7 @@ from app.infrastructure.repositories.generic_repository import GenericRepository
 from tests.infrastructure.helpers import TestEntity, TestId, TestPropertyEntity
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generic_repository_no_orm_mapping_raises_error(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
@@ -35,9 +35,9 @@ async def test_generic_repository_no_orm_mapping_raises_error(
             GenericRepository(session, UnmappedEntity, int)
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generic_repository_get_by_id_sqlalchemy_error(
-    uow: IUnitOfWork,
+    uow: IUnitOfWork, mocker: MockerFixture
 ) -> None:
     """Test that get_by_id returns RepositoryError on SQLAlchemy error."""
     user_id = TestId.generate().expect("TestId.generate should succeed")
@@ -46,20 +46,22 @@ async def test_generic_repository_get_by_id_sqlalchemy_error(
         repo = uow.GetRepository(TestEntity, TestId)
 
         # Mock session.execute to raise SQLAlchemyError
-        with patch.object(
+        mocker.patch.object(
             repo._session,  # type: ignore[attr-defined]
             "execute",
             side_effect=SQLAlchemyError("Database error"),
-        ):
-            result = await repo.get_by_id(user_id)
+        )
+        result = await repo.get_by_id(user_id)
 
         assert is_err(result)
         assert result.error.type == RepositoryErrorType.UNEXPECTED
         assert "Database error" in result.error.message
 
 
-@pytest.mark.anyio
-async def test_generic_repository_add_sqlalchemy_error(uow: IUnitOfWork) -> None:
+@pytest.mark.asyncio
+async def test_generic_repository_add_sqlalchemy_error(
+    uow: IUnitOfWork, mocker: MockerFixture
+) -> None:
     """Test that add returns RepositoryError on SQLAlchemy error."""
     user = TestEntity.create(
         name="TestUser",
@@ -70,19 +72,19 @@ async def test_generic_repository_add_sqlalchemy_error(uow: IUnitOfWork) -> None
         repo = uow.GetRepository(TestEntity)
 
         # Mock ORMMappingRegistry.to_orm to raise SQLAlchemyError
-        with patch.object(
+        mocker.patch.object(
             ORMMappingRegistry,
             "to_orm",
             side_effect=SQLAlchemyError("Conversion error"),
-        ):
-            result = await repo.add(user)
+        )
+        result = await repo.add(user)
 
         assert is_err(result)
         assert result.error.type == RepositoryErrorType.UNEXPECTED
         assert "Conversion error" in result.error.message
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generic_repository_delete_entity_without_id(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
@@ -124,7 +126,7 @@ async def test_generic_repository_delete_entity_without_id(
         assert "does not have an id attribute" in result.error.message
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generic_repository_delete_non_existent_entity(
     uow: IUnitOfWork,
 ) -> None:
@@ -143,8 +145,10 @@ async def test_generic_repository_delete_non_existent_entity(
         assert "not found" in result.error.message
 
 
-@pytest.mark.anyio
-async def test_generic_repository_delete_sqlalchemy_error(uow: IUnitOfWork) -> None:
+@pytest.mark.asyncio
+async def test_generic_repository_delete_sqlalchemy_error(
+    uow: IUnitOfWork, mocker: MockerFixture
+) -> None:
     """Test that delete returns RepositoryError on SQLAlchemy error."""
     # First create a user
     user = TestEntity.create(
@@ -164,21 +168,21 @@ async def test_generic_repository_delete_sqlalchemy_error(uow: IUnitOfWork) -> N
         repo = uow.GetRepository(TestEntity, TestId)
 
         # Mock session.execute to raise SQLAlchemyError
-        with patch.object(
+        mocker.patch.object(
             repo._session,  # type: ignore[attr-defined]
             "execute",
             side_effect=SQLAlchemyError("Delete error"),
-        ):
-            result = await repo.delete(saved_user)
+        )
+        result = await repo.delete(saved_user)
 
         assert is_err(result)
         assert result.error.type == RepositoryErrorType.UNEXPECTED
         assert "Delete error" in result.error.message
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generic_repository_update_entity_deleted_during_version_check(
-    uow: IUnitOfWork,
+    uow: IUnitOfWork, mocker: MockerFixture
 ) -> None:
     """Test update returns NOT_FOUND when entity is deleted during version check.
 
@@ -207,33 +211,33 @@ async def test_generic_repository_update_entity_deleted_during_version_check(
 
         # Create mock objects for execute results
         # First execute: entity existence check - returns entity exists
-        existence_check_mock = MagicMock()
+        existence_check_mock = mocker.MagicMock()
         existence_check_mock.scalar_one_or_none.return_value = (
-            MagicMock()
+            mocker.MagicMock()
         )  # Entity exists
 
         # Second execute: UPDATE statement returns rowcount=0 (version mismatch)
-        update_result_mock = MagicMock()
+        update_result_mock = mocker.MagicMock()
         update_result_mock.rowcount = 0
 
         # Third execute: Re-fetch for version conflict - returns None (entity deleted)
-        refetch_mock = MagicMock()
+        refetch_mock = mocker.MagicMock()
         refetch_mock.scalar_one_or_none.return_value = None  # Entity was deleted
 
         # Mock session.execute to return different results for each call
-        execute_mock = AsyncMock()
+        execute_mock = mocker.AsyncMock()
         execute_mock.side_effect = [
             existence_check_mock,
             update_result_mock,
             refetch_mock,
         ]
 
-        with patch.object(
+        mocker.patch.object(
             repo._session,  # type: ignore[attr-defined]
             "execute",
             execute_mock,  # type: ignore[attr-defined]
-        ):
-            result = await repo.update(updated_team)
+        )
+        result = await repo.update(updated_team)
 
         assert is_err(result)
         assert result.error.type == RepositoryErrorType.NOT_FOUND

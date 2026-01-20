@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, Mock
+from typing import Any
 
 import pytest
 
@@ -14,14 +14,14 @@ from app.usecases.chat.generate_content_without_lean import (
 
 
 @pytest.fixture
-def mock_ai_service() -> IAIService:
-    service = Mock(spec=IAIService)
-    service.generate_content = AsyncMock(return_value=Ok("Generated Content"))
+def mock_ai_service(mocker: Any) -> IAIService:
+    service = mocker.Mock(spec=IAIService)
+    service.generate_content = mocker.AsyncMock(return_value=Ok("Generated Content"))
     service.provider = AIProvider.GEMINI
     return service
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generate_content_without_lean_success(
     uow: IUnitOfWork, mock_ai_service: IAIService
 ):
@@ -47,7 +47,7 @@ async def test_generate_content_without_lean_success(
         assert len(messages) == 0
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generate_content_without_lean_ai_failure(
     uow: IUnitOfWork, mock_ai_service: IAIService
 ):
@@ -61,17 +61,17 @@ async def test_generate_content_without_lean_ai_failure(
     assert "Failed to generate content" in result.error.message
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_generate_content_without_lean_history_failure(
-    uow: IUnitOfWork, mock_ai_service: IAIService
+    uow: IUnitOfWork, mock_ai_service: IAIService, mocker: Any
 ):
     """Test history retrieval failure."""
-    mock_uow = Mock(spec=IUnitOfWork)
-    mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
-    mock_uow.__aexit__ = AsyncMock(return_value=None)
+    mock_uow = mocker.Mock(spec=IUnitOfWork)
+    mock_uow.__aenter__ = mocker.AsyncMock(return_value=mock_uow)
+    mock_uow.__aexit__ = mocker.AsyncMock(return_value=None)
 
-    mock_repo = Mock()
-    mock_repo.get_recent_history = AsyncMock(return_value=Err("DB Error"))
+    mock_repo = mocker.Mock()
+    mock_repo.get_recent_history = mocker.AsyncMock(return_value=Err("DB Error"))
 
     mock_uow.GetRepository.return_value = mock_repo
 

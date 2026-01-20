@@ -1,5 +1,5 @@
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any
 
 import pytest
 
@@ -8,22 +8,22 @@ from app.infrastructure.messaging.postgres_event_bus import PostgresEventBus
 
 
 @pytest.fixture
-def mock_pool() -> tuple[MagicMock, AsyncMock]:
-    pool = MagicMock()
+def mock_pool(mocker: Any) -> tuple[Any, Any]:
+    pool = mocker.MagicMock()
 
     # pool.close() is awaited
-    pool.close = AsyncMock()
+    pool.close = mocker.AsyncMock()
 
-    conn = AsyncMock()
+    conn = mocker.AsyncMock()
     # connection methods are async
-    conn.fetchrow = AsyncMock()
-    conn.execute = AsyncMock()
+    conn.fetchrow = mocker.AsyncMock()
+    conn.execute = mocker.AsyncMock()
 
     # pool.acquire() is an async context manager, so it returns an object with __aenter__
     # The method acquire() itself is NOT async (it returns the context manager imediatelly)
-    acquire_ctx = MagicMock()
-    acquire_ctx.__aenter__ = AsyncMock(return_value=conn)
-    acquire_ctx.__aexit__ = AsyncMock(return_value=None)
+    acquire_ctx = mocker.MagicMock()
+    acquire_ctx.__aenter__ = mocker.AsyncMock(return_value=conn)
+    acquire_ctx.__aexit__ = mocker.AsyncMock(return_value=None)
 
     pool.acquire.return_value = acquire_ctx
 
@@ -44,7 +44,7 @@ async def test_subscribe_adds_handler() -> None:
 
 @pytest.mark.asyncio
 async def test_publish_inserts_and_notifies(
-    mock_pool: tuple[MagicMock, AsyncMock],
+    mock_pool: tuple[Any, Any],
 ) -> None:
     pool, conn = mock_pool
     bus = PostgresEventBus()
@@ -87,34 +87,33 @@ async def test_process_notification_calls_handler() -> None:
 
 @pytest.mark.asyncio
 async def test_start_creates_pool_and_listener(
-    mock_pool: tuple[MagicMock, AsyncMock],
+    mock_pool: tuple[Any, Any], mocker: Any
 ) -> None:
     # Verify start logic
     pool_mock, conn_mock = mock_pool
     bus = PostgresEventBus()
     bus.dsn = "postgres://mock"
 
-    with (
-        patch(
-            "app.infrastructure.messaging.postgres_event_bus.asyncpg.create_pool",
-            new_callable=AsyncMock,
-        ) as mock_create_pool,
-        patch(
-            "app.infrastructure.messaging.postgres_event_bus.asyncpg.connect",
-            new_callable=AsyncMock,
-        ) as mock_connect,
-    ):
-        mock_create_pool.return_value = pool_mock
-        mock_connect.return_value = conn_mock  # listener connection
+    mock_create_pool = mocker.patch(
+        "app.infrastructure.messaging.postgres_event_bus.asyncpg.create_pool",
+        new_callable=mocker.AsyncMock,
+    )
+    mock_connect = mocker.patch(
+        "app.infrastructure.messaging.postgres_event_bus.asyncpg.connect",
+        new_callable=mocker.AsyncMock,
+    )
 
-        async def cancel_later() -> None:
-            await asyncio.sleep(0.1)
-            bus._running = False
+    mock_create_pool.return_value = pool_mock
+    mock_connect.return_value = conn_mock  # listener connection
 
-        task = asyncio.create_task(bus.start())
-        await cancel_later()
-        await task
+    async def cancel_later() -> None:
+        await asyncio.sleep(0.1)
+        bus._running = False
 
-        assert mock_create_pool.called
-        assert mock_connect.called
-        assert conn_mock.add_listener.called  # Verify listener added
+    task = asyncio.create_task(bus.start())
+    await cancel_later()
+    await task
+
+    assert mock_create_pool.called
+    assert mock_connect.called
+    assert conn_mock.add_listener.called  # Verify listener added

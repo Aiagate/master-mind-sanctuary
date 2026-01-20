@@ -7,7 +7,7 @@ from app.domain.repositories import IUnitOfWork
 from tests.infrastructure.helpers import TestEntity, TestId
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_uow_rollback(uow: IUnitOfWork) -> None:
     """Test that the Unit of Work rolls back transactions on error."""
     user = TestEntity.create(

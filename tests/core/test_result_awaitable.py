@@ -16,7 +16,7 @@ async def async_add_ten(x: int) -> Result[int, UseCaseError]:
     return Ok(x + 10)
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_await_ok() -> None:
     """Test that ResultAwaitable can be awaited to get Result."""
 
@@ -30,7 +30,7 @@ async def test_result_awaitable_await_ok() -> None:
     assert result.value == 42
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_await_err() -> None:
     """Test that ResultAwaitable can be awaited to get Err."""
     error = UseCaseError(type=ErrorType.NOT_FOUND, message="Not found")
@@ -45,7 +45,7 @@ async def test_result_awaitable_await_err() -> None:
     assert result.error is error
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_ok() -> None:
     """Test that ResultAwaitable.map transforms Ok value."""
 
@@ -58,7 +58,7 @@ async def test_result_awaitable_map_ok() -> None:
     assert result.value == 10
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_err() -> None:
     """Test that ResultAwaitable.map passes through Err."""
     error = UseCaseError(type=ErrorType.VALIDATION_ERROR, message="Invalid")
@@ -72,7 +72,7 @@ async def test_result_awaitable_map_err() -> None:
     assert result.error is error
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_chain() -> None:
     """Test that multiple map calls can be chained."""
 
@@ -90,7 +90,7 @@ async def test_result_awaitable_map_chain() -> None:
     assert result.value == "Result: 13"
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_unwrap_ok() -> None:
     """Test that unwrap returns value for Ok."""
 
@@ -102,7 +102,7 @@ async def test_result_awaitable_unwrap_ok() -> None:
     assert value == 42
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_unwrap_err() -> None:
     """Test that unwrap raises exception for Err."""
     error = UseCaseError(type=ErrorType.NOT_FOUND, message="Not found")
@@ -116,7 +116,7 @@ async def test_result_awaitable_unwrap_err() -> None:
     assert exc_info.value is error
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_full_chain() -> None:
     """Test complete chain: map -> map -> unwrap."""
 
@@ -130,7 +130,7 @@ async def test_result_awaitable_full_chain() -> None:
     assert value == 25
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_full_chain_with_err() -> None:
     """Test complete chain with Err raises exception."""
     error = UseCaseError(type=ErrorType.UNEXPECTED, message="Error")
@@ -144,7 +144,7 @@ async def test_result_awaitable_full_chain_with_err() -> None:
     assert exc_info.value is error
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_and_then_ok() -> None:
     """Test that ResultAwaitable.and_then applies function for Ok."""
 
@@ -158,7 +158,7 @@ async def test_result_awaitable_and_then_ok() -> None:
     assert final.value == 10
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_and_then_err() -> None:
     """Test that ResultAwaitable.and_then passes through Err."""
     error = UseCaseError(type=ErrorType.NOT_FOUND, message="Not found")
@@ -173,7 +173,7 @@ async def test_result_awaitable_and_then_err() -> None:
     assert final.error is error
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_and_then_chain() -> None:
     """Test that multiple and_then calls can be chained."""
 
@@ -187,7 +187,7 @@ async def test_result_awaitable_and_then_chain() -> None:
     assert final.value == 14  # (2 * 2) + 10
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_and_then_with_map() -> None:
     """Test that and_then and map can be combined."""
 
@@ -205,7 +205,7 @@ async def test_result_awaitable_and_then_with_map() -> None:
     assert final_value == 25  # ((5 * 2) + 5) + 10
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_and_then_error_propagation() -> None:
     """Test that error in and_then chain stops further processing."""
 
@@ -228,7 +228,7 @@ async def test_result_awaitable_and_then_error_propagation() -> None:
     assert final.error is error
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_err_ok() -> None:
     """Test that ResultAwaitable.map_err passes through Ok unchanged."""
 
@@ -243,7 +243,7 @@ async def test_result_awaitable_map_err_ok() -> None:
     assert result.value == 42
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_err_err() -> None:
     """Test that ResultAwaitable.map_err transforms Err value."""
 
@@ -260,7 +260,7 @@ async def test_result_awaitable_map_err_err() -> None:
     assert result.error.message == "Wrapped: original error"
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_err_chain() -> None:
     """Test that multiple map_err calls can be chained asynchronously."""
 
@@ -278,7 +278,7 @@ async def test_result_awaitable_map_err_chain() -> None:
     assert str(result.error) == "Level 3: Level 2: Level 1: base error"
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_result_awaitable_map_err_with_map_and_then() -> None:
     """Test that map, and_then, and map_err can be mixed in async chains."""
 
