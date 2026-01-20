@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 from typing import Any
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -14,11 +13,11 @@ from app.infrastructure.services.ollama_service import OllamaService
 
 class TestOllamaService:
     @pytest.fixture
-    def mock_ollama_client(self) -> Any:
-        with patch("app.infrastructure.services.ollama_service.AsyncClient") as mock:
-            client_instance = AsyncMock()
-            mock.return_value = client_instance
-            yield client_instance
+    def mock_ollama_client(self, mocker: Any) -> Any:
+        mock = mocker.patch("app.infrastructure.services.ollama_service.AsyncClient")
+        client_instance = mocker.AsyncMock()
+        mock.return_value = client_instance
+        return client_instance
 
     def test_provider_property(self) -> None:
         service = OllamaService()
@@ -26,12 +25,12 @@ class TestOllamaService:
 
     @pytest.mark.asyncio
     async def test_generate_content_success(
-        self, mock_ollama_client: AsyncMock
+        self, mock_ollama_client: Any, mocker: Any
     ) -> None:
         # Setup
         service = OllamaService()
 
-        mock_response = AsyncMock()
+        mock_response = mocker.AsyncMock()
         mock_response.message.content = "Ollama response"
         mock_ollama_client.chat.return_value = mock_response
 
@@ -59,12 +58,12 @@ class TestOllamaService:
 
     @pytest.mark.asyncio
     async def test_generate_content_empty_response(
-        self, mock_ollama_client: AsyncMock
+        self, mock_ollama_client: Any, mocker: Any
     ) -> None:
         # Setup
         service = OllamaService()
 
-        mock_response = AsyncMock()
+        mock_response = mocker.AsyncMock()
         mock_response.message.content = ""
         mock_ollama_client.chat.return_value = mock_response
 
@@ -77,9 +76,7 @@ class TestOllamaService:
         assert str(result.error) == "Ollama returned empty content."
 
     @pytest.mark.asyncio
-    async def test_generate_content_api_error(
-        self, mock_ollama_client: AsyncMock
-    ) -> None:
+    async def test_generate_content_api_error(self, mock_ollama_client: Any) -> None:
         # Setup
         service = OllamaService()
         mock_ollama_client.chat.side_effect = Exception("API connection failed")

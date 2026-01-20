@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, Mock
+from typing import Any
 
 import pytest
 
@@ -12,11 +12,11 @@ from app.usecases.messaging.publish_received_direct_message import (
 )
 
 
-@pytest.mark.anyio
-async def test_publish_received_direct_message(uow: IUnitOfWork):
+@pytest.mark.asyncio
+async def test_publish_received_direct_message(uow: IUnitOfWork, mocker: Any):
     """Test saving message and publishing direct message event."""
-    mock_bus = Mock(spec=IEventBus)
-    mock_bus.publish = AsyncMock()
+    mock_bus = mocker.Mock(spec=IEventBus)
+    mock_bus.publish = mocker.AsyncMock()
 
     handler = PublishReceivedDirectMessageHandler(mock_bus, uow)
     command = PublishReceivedDirectMessageCommand(

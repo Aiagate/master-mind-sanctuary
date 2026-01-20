@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from openai.types.chat import ChatCompletion
@@ -15,13 +14,13 @@ from app.infrastructure.services.ollama_openai_service import OllamaOpenAIServic
 
 class TestOllamaOpenAIService:
     @pytest.fixture
-    def mock_openai_client(self) -> Any:
-        with patch(
+    def mock_openai_client(self, mocker: Any) -> Any:
+        mock = mocker.patch(
             "app.infrastructure.services.ollama_openai_service.AsyncOpenAI"
-        ) as mock:
-            client_instance = AsyncMock()
-            mock.return_value = client_instance
-            yield client_instance
+        )
+        client_instance = mocker.AsyncMock()
+        mock.return_value = client_instance
+        return client_instance
 
     def test_provider_property(self) -> None:
         service = OllamaOpenAIService()
@@ -29,13 +28,13 @@ class TestOllamaOpenAIService:
 
     @pytest.mark.asyncio
     async def test_generate_content_success(
-        self, mock_openai_client: AsyncMock
+        self, mock_openai_client: Any, mocker: Any
     ) -> None:
         # Setup
         service = OllamaOpenAIService()
 
-        mock_response = MagicMock(spec=ChatCompletion)
-        mock_choice = MagicMock()
+        mock_response = mocker.MagicMock(spec=ChatCompletion)
+        mock_choice = mocker.MagicMock()
         mock_choice.message.content = "Ollama OpenAI response"
         mock_response.choices = [mock_choice]
 
@@ -65,13 +64,13 @@ class TestOllamaOpenAIService:
 
     @pytest.mark.asyncio
     async def test_generate_content_empty_response(
-        self, mock_openai_client: AsyncMock
+        self, mock_openai_client: Any, mocker: Any
     ) -> None:
         # Setup
         service = OllamaOpenAIService()
 
-        mock_response = MagicMock(spec=ChatCompletion)
-        mock_choice = MagicMock()
+        mock_response = mocker.MagicMock(spec=ChatCompletion)
+        mock_choice = mocker.MagicMock()
         mock_choice.message.content = None
         mock_response.choices = [mock_choice]
 
@@ -86,9 +85,7 @@ class TestOllamaOpenAIService:
         assert str(result.error) == "Ollama (OpenAI) returned empty content."
 
     @pytest.mark.asyncio
-    async def test_generate_content_api_error(
-        self, mock_openai_client: AsyncMock
-    ) -> None:
+    async def test_generate_content_api_error(self, mock_openai_client: Any) -> None:
         # Setup
         service = OllamaOpenAIService()
         mock_openai_client.chat.completions.create.side_effect = Exception(

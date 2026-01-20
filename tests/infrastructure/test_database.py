@@ -6,7 +6,7 @@ from sqlalchemy import text
 from app.infrastructure.database import get_session
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_get_db_session(test_db_engine: None) -> None:
     """Test get_session provides a valid session."""
     session_generator = get_session()

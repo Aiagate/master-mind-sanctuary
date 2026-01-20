@@ -2,8 +2,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, DateTime, String, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Column, DateTime, String, func
 from sqlmodel import Field, SQLModel
 
 
@@ -14,7 +13,7 @@ class CommandOutboxORM(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     command_type: str = Field(sa_column=Column(String, nullable=False))
-    payload: dict[str, Any] = Field(default={}, sa_column=Column(JSONB, nullable=False))
+    payload: dict[str, Any] = Field(default={}, sa_column=Column(JSON, nullable=False))
     status: str = Field(
         default="PENDING", sa_column=Column(String, nullable=False, index=True)
     )

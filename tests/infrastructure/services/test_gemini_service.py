@@ -1,5 +1,4 @@
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -13,12 +12,12 @@ class TestGeminiService:
             "app.infrastructure.services.gemini_service.genai.Client", autospec=True
         )
         # Setup async accessors
-        mock_client.return_value.aio = MagicMock()
-        mock_client.return_value.aio.chats = MagicMock()
-        mock_client.return_value.aio.chats.create = MagicMock()
-        mock_client.return_value.aio.caches = MagicMock()
-        mock_client.return_value.aio.caches.list = MagicMock()
-        mock_client.return_value.aio.caches.create = AsyncMock()
+        mock_client.return_value.aio = mocker.MagicMock()
+        mock_client.return_value.aio.chats = mocker.MagicMock()
+        mock_client.return_value.aio.chats.create = mocker.MagicMock()
+        mock_client.return_value.aio.caches = mocker.MagicMock()
+        mock_client.return_value.aio.caches.list = mocker.MagicMock()
+        mock_client.return_value.aio.caches.create = mocker.AsyncMock()
         return mock_client
 
     # @pytest.mark.asyncio
@@ -111,8 +110,8 @@ class TestGeminiService:
         service._cache_name = "test_cache_name"  # Simulate initialized
         mock_client_instance = mock_genai_client.return_value
 
-        mock_chat = MagicMock()
-        mock_chat.send_message = AsyncMock()
+        mock_chat = mocker.MagicMock()
+        mock_chat.send_message = mocker.AsyncMock()
         mock_chat.send_message.return_value.text = "Hello"
         mock_client_instance.aio.chats.create.return_value = mock_chat
 
@@ -140,8 +139,8 @@ class TestGeminiService:
         service._cache_name = None  # Not initialized
         mock_client_instance = mock_genai_client.return_value
 
-        mock_chat = MagicMock()
-        mock_chat.send_message = AsyncMock()
+        mock_chat = mocker.MagicMock()
+        mock_chat.send_message = mocker.AsyncMock()
         mock_chat.send_message.return_value.text = "Hello"
         mock_client_instance.aio.chats.create.return_value = mock_chat
 

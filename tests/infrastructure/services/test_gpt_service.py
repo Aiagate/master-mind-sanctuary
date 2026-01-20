@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -17,8 +16,8 @@ class TestGptService:
             "app.infrastructure.services.gpt_service.AsyncOpenAI", autospec=True
         )
         # Setup async accessors
-        mock_client.return_value.responses = MagicMock()
-        mock_client.return_value.responses.create = AsyncMock()
+        mock_client.return_value.responses = mocker.MagicMock()
+        mock_client.return_value.responses.create = mocker.AsyncMock()
         return mock_client
 
     @pytest.mark.asyncio
@@ -30,7 +29,7 @@ class TestGptService:
         service = GptService()
         service._client = mock_openai_client.return_value
 
-        mock_response = MagicMock()
+        mock_response = mocker.MagicMock()
         mock_response.output_text = "Response Content"
         service._client.responses.create.return_value = mock_response
 
