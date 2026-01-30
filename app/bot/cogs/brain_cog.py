@@ -7,6 +7,7 @@ from app.core.mediator import Mediator
 from app.core.result import is_ok
 from app.domain.decorators import event_listener
 from app.domain.interfaces.event_bus import Event, IEventBus
+from app.usecases.chat.spontaneous_dialog import SpontaneousDialogCommand
 from app.usecases.messaging.process_sns_update import ProcessSnsUpdateCommand
 from app.usecases.messaging.publish_received_direct_message import (
     PublishReceivedDirectMessageCommand,
@@ -67,24 +68,23 @@ class BrainCog(commands.Cog):
                 if dto.content:
                     await channel.send(dto.content)
 
-    @event_listener("bot.speak")
-    async def on_bot_speak(self, event: Event) -> None:
-        """Speak when Worker instructs to."""
-        channel_id = event.payload.get("channel_id")
-        content = event.payload.get("content")
+    @event_listener("system.heartbeat")
+    async def on_heartbeat(self, event: Event) -> None:
+        """Process heartbeat event and potentially speak."""
+        # トランザクションとAI処理を含むコマンドを呼び出し
+        result = await Mediator.send_async(SpontaneousDialogCommand())
 
-        if not channel_id or not content:
-            return
+        if is_ok(result):
+            data = result.unwrap()
+            channel = self.bot.get_channel(int(data.channel_id))
+            if not channel:
+                try:
+                    channel = await self.bot.fetch_channel(int(data.channel_id))
+                except discord.NotFound:
+                    return
 
-        channel = self.bot.get_channel(channel_id)
-        if not channel:
-            try:
-                channel = await self.bot.fetch_channel(channel_id)
-            except discord.NotFound:
-                return
-
-        if channel and isinstance(channel, discord.abc.Messageable):
-            await channel.send(content)
+            if channel and isinstance(channel, discord.abc.Messageable):
+                await channel.send(data.content)
 
 
 class BrainCogLoader:

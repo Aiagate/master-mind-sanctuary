@@ -8,11 +8,13 @@ from typing import TYPE_CHECKING, Any, overload
 from app.core.result import Result
 from app.domain.aggregates.chat_history import ChatMessage
 from app.domain.aggregates.command import Command
+from app.domain.aggregates.session import Session
 from app.domain.aggregates.system_instruction import SystemInstruction
 
 if TYPE_CHECKING:
     from app.domain.repositories.chat_history_repository import IChatHistoryRepository
     from app.domain.repositories.command_repository import ICommandRepository
+    from app.domain.repositories.session_repository import ISessionRepository
     from app.domain.repositories.system_instruction_repository import (
         ISystemInstructionRepository,
     )
@@ -105,6 +107,11 @@ class IUnitOfWork(ABC):
         ...
 
     @overload
+    def GetRepository(self, entity_type: type[Session]) -> "ISessionRepository":
+        """Get repository for Session."""
+        ...
+
+    @overload
     def GetRepository[T](self, entity_type: type[T]) -> IRepository[T]:
         """Get repository for add and delete operations.
 
@@ -140,6 +147,7 @@ class IUnitOfWork(ABC):
         | "IChatHistoryRepository"
         | "ICommandRepository"
         | "ISystemInstructionRepository"
+        | "ISessionRepository"
     ):
         """Get repository for entity type.
 

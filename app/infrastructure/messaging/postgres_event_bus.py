@@ -6,6 +6,7 @@ from typing import Any
 
 import asyncpg
 
+from app.core.result import Err, Ok, Result
 from app.domain.interfaces.event_bus import Event, EventHandler, IEventBus
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,8 @@ class PostgresEventBus(IEventBus):
     def __init__(self) -> None:
         self._handlers: dict[str, list[EventHandler]] = {}
         self._pool: asyncpg.Pool | None = None
+        self._listener_conn: asyncpg.Connection | None = None
+        self._listener_task: asyncio.Task[None] | None = None
         self._running = False
 
         db_url = os.getenv("DATABASE_URL")
@@ -30,10 +33,12 @@ class PostgresEventBus(IEventBus):
         self._handlers[topic].append(handler)
         logger.debug(f"Subscribed to topic: {topic}")
 
-    async def publish(self, topic: str, payload: dict[str, Any]) -> None:
+    async def publish(
+        self, topic: str, payload: dict[str, Any]
+    ) -> Result[None, Exception]:
         if not self._pool:
             logger.warning("EventBus not started, cannot publish events.")
-            return
+            return Err(RuntimeError("EventBus not started"))
 
         async with self._pool.acquire() as conn:
             try:
@@ -62,15 +67,16 @@ class PostgresEventBus(IEventBus):
 
                 await conn.execute(f"NOTIFY bot_events, '{notify_payload}'")
                 logger.debug(f"Published event: {topic}")
+                return Ok(None)
 
             except Exception as e:
                 logger.error(f"Failed to publish event {topic}: {e}")
-                raise
+                return Err(e)
 
-    async def start(self) -> None:
+    async def start(self) -> Result[None, Exception]:
         if not self.dsn:
             logger.error("DATABASE_URL not set, cannot start EventBus.")
-            return
+            return Err(RuntimeError("DATABASE_URL not set"))
 
         self._running = True
         try:
@@ -78,29 +84,47 @@ class PostgresEventBus(IEventBus):
             logger.info("EventBus connection pool created.")
 
             # Create a dedicated connection for listening
-            # The pool is used for publishing, but we need a persistent connection for LISTEN
-            # We can acquire one from the pool or create a separate one.
-            # Ideally separate to avoid blocking a pool slot forever.
-            listener_conn = await asyncpg.connect(self.dsn)
+            self._listener_conn = await asyncpg.connect(self.dsn)
 
             async def _listener(
                 connection: Any, pid: int, channel: str, payload: str
             ) -> None:
                 asyncio.create_task(self._process_notification(payload))
 
-            await listener_conn.add_listener("bot_events", _listener)
+            if self._listener_conn:
+                await self._listener_conn.add_listener("bot_events", _listener)
             logger.info("Postgres Event Bus Started. Listening on 'bot_events'.")
 
-            # Keep the listener alive
-            while self._running:
-                await asyncio.sleep(1)
+            # Keep the listener alive in background
+            self._listener_task = asyncio.create_task(self._keep_alive())
+            return Ok(None)
 
         except Exception as e:
             logger.error(f"Error in EventBus start: {e}")
-            raise
-        finally:
+            return Err(e)
+
+    async def _keep_alive(self) -> None:
+        while self._running:
+            await asyncio.sleep(1)
+
+    async def stop(self) -> Result[None, Exception]:
+        try:
+            self._running = False
+            if self._listener_task:
+                self._listener_task.cancel()
+                try:
+                    await self._listener_task
+                except asyncio.CancelledError:
+                    pass
+
+            if self._listener_conn:
+                await self._listener_conn.close()
+
             if self._pool:
                 await self._pool.close()
+            return Ok(None)
+        except Exception as e:
+            return Err(e)
 
     async def _process_notification(self, raw_payload: str) -> None:
         """Process incoming notifications and dispatch to handlers."""

@@ -10,7 +10,8 @@
       "envFile": "${workspaceFolder}/.env.local",
       "env": {
         "AI_PROVIDER": "mock",
-        "DATABASE_URL": "sqlite+aiosqlite:///./mock.db"
+        "DATABASE_URL": "sqlite+aiosqlite:///./mock.db",
+        "DEBUG_CHANNEL_ID": "786125475151216652"
       }
     },
     {

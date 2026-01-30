@@ -1,8 +1,8 @@
-import asyncio
 from typing import Any
 
 import pytest
 
+from app.core.result import is_ok
 from app.domain.interfaces.event_bus import Event
 from app.infrastructure.messaging.postgres_event_bus import PostgresEventBus
 
@@ -55,7 +55,8 @@ async def test_publish_inserts_and_notifies(
     topic = "my.topic"
     payload = {"foo": "bar"}
 
-    await bus.publish(topic, payload)
+    result = await bus.publish(topic, payload)
+    assert is_ok(result)
 
     assert conn.fetchrow.called
     args, _ = conn.fetchrow.call_args
@@ -106,14 +107,12 @@ async def test_start_creates_pool_and_listener(
     mock_create_pool.return_value = pool_mock
     mock_connect.return_value = conn_mock  # listener connection
 
-    async def cancel_later() -> None:
-        await asyncio.sleep(0.1)
-        bus._running = False
-
-    task = asyncio.create_task(bus.start())
-    await cancel_later()
-    await task
+    start_result = await bus.start()
+    assert is_ok(start_result)
 
     assert mock_create_pool.called
     assert mock_connect.called
     assert conn_mock.add_listener.called  # Verify listener added
+
+    # Clean up
+    await bus.stop()

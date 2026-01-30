@@ -1,0 +1,22 @@
+{
+    "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+    "tools": {
+        "enableHooks": true
+    },
+    "hooks": {
+        "enabled": true,
+        "SessionStart": [
+            {
+                "matcher": "startup",
+                "hooks": [
+                    {
+                        "name": "init-assistant",
+                        "type": "command",
+                        "command": "uv run python -m app.scripts.publish_event gemini.events '{\"type\": \"session_started\"}'",
+                        "description": "Initialize Smart Workflow Assistant"
+                    }
+                ]
+            }
+        ]
+    }
+}

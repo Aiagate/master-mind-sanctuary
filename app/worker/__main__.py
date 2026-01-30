@@ -43,14 +43,16 @@ async def main() -> None:
 
     # 3. Get EventBus
     from app.domain.interfaces.event_bus import IEventBus
-    from app.worker.consumer import run_worker_consumer
 
     bus = injector.get(IEventBus)
+    (await bus.start()).unwrap()
 
     # 4. Start Background Tasks
-    async with asyncio.TaskGroup() as tg:
-        tg.create_task(heartbeat_producer(bus, interval_seconds=60))
-        tg.create_task(run_worker_consumer(injector))
+    try:
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(heartbeat_producer(bus, interval_seconds=60))
+    finally:
+        await bus.stop()
 
 
 if __name__ == "__main__":

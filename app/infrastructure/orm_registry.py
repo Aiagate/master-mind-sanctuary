@@ -5,9 +5,11 @@ Import this module to ensure mappings are registered before using repositories.
 """
 
 from app.domain.aggregates.chat_history import ChatMessage
+from app.domain.aggregates.session import Session
 from app.domain.aggregates.system_instruction import SystemInstruction
 from app.infrastructure.orm_mapping import register_orm_mapping
 from app.infrastructure.orm_models.chat_message_orm import ChatMessageORM
+from app.infrastructure.orm_models.session_orm import SessionORM
 from app.infrastructure.orm_models.system_instruction_orm import SystemInstructionORM
 
 
@@ -19,3 +21,4 @@ def init_orm_mappings() -> None:
     """
     register_orm_mapping(ChatMessage, ChatMessageORM)
     register_orm_mapping(SystemInstruction, SystemInstructionORM)
+    register_orm_mapping(Session, SessionORM)

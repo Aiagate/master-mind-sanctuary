@@ -4,12 +4,12 @@ from datetime import UTC, datetime
 from injector import inject
 
 from app.core.mediator import Request, RequestHandler
-from app.core.result import Ok, Result
+from app.core.result import Err, Ok, Result, is_err
 from app.domain.aggregates.chat_history import ChatMessage, ChatRole
 from app.domain.interfaces.event_bus import IEventBus
 from app.domain.repositories.interfaces import IUnitOfWork
 from app.domain.value_objects import SentAt
-from app.usecases.result import UseCaseError
+from app.usecases.result import ErrorType, UseCaseError
 
 
 @dataclass(frozen=True)
@@ -60,7 +60,8 @@ class PublishReceivedDirectMessageHandler(
             await self._uow.commit()
 
         # 2. Publish Event
-        await self.bus.publish(
+        # 2. Publish Event
+        pub_result = await self.bus.publish(
             "discord.direct_message",
             {
                 "author": request.author,
@@ -68,4 +69,11 @@ class PublishReceivedDirectMessageHandler(
                 "channel_id": request.channel_id,
             },
         )
+        if is_err(pub_result):
+            return Err(
+                UseCaseError(
+                    type=ErrorType.UNEXPECTED,
+                    message=f"Failed to publish event: {pub_result.error}",
+                )
+            )
         return Ok(PublishReceivedDirectMessageResult())

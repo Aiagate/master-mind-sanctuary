@@ -7,12 +7,12 @@ from app.bot.cogs.base_cog import BaseCog
 class SubscriptionCog(BaseCog, name="Subscription"):
     """購読に関連するコマンドを管理するCog。"""
 
-    @commands.command(name="subscribe-ai")
+    @commands.command(name="subscribe-dm")
     async def subscribe(self, ctx: commands.Context[commands.Bot]) -> None:
         """
         購読を開始し、ユーザーにDMを送信します。
 
-        使用法: !subscribe
+        使用法: !subscribe-dm
         """
         try:
             message = (

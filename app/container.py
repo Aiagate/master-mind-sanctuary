@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.domain.interfaces.ai_service import IAIService, IEmbeddingService
 from app.domain.interfaces.event_bus import IEventBus
+from app.domain.interfaces.session_service import ISessionService
 from app.domain.repositories import IUnitOfWork
 from app.infrastructure.orm_registry import init_orm_mappings
 from app.infrastructure.unit_of_work import SQLAlchemyUnitOfWork
@@ -39,6 +40,7 @@ def configure(binder: injector.Binder) -> None:
     binder.install(DatabaseModule())
     binder.install(AIModule())
     binder.install(MessagingModule())
+    binder.install(SessionModule())
 
 
 class AIModule(injector.Module):
@@ -103,6 +105,20 @@ class AIModule(injector.Module):
         )
 
         return MockEmbeddingService()
+
+
+class SessionModule(injector.Module):
+    """Module for session-related dependencies."""
+
+    @injector.provider
+    @injector.singleton
+    def provide_session_service(self) -> ISessionService:
+        """Provide Session service implementation."""
+        from app.infrastructure.services.shell_session_service import (
+            ShellSessionService,
+        )
+
+        return ShellSessionService()
 
 
 class MessagingModule(injector.Module):

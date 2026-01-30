@@ -15,6 +15,7 @@ from app.core.config import load_app_environment
 # Import all ORM models here for autogenerate to discover them
 from app.infrastructure.orm_models import (
     ChatMessageORM,  # pyright: ignore[reportUnusedImport] # noqa: F401
+    SessionORM,  # pyright: ignore[reportUnusedImport] # noqa: F401
     SystemInstructionORM,  # pyright: ignore[reportUnusedImport] # noqa: F401
 )
 

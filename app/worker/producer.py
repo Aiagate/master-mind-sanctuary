@@ -13,7 +13,7 @@ async def heartbeat_producer(bus: IEventBus, interval_seconds: int = 60) -> None
         while True:
             await asyncio.sleep(interval_seconds)
 
-            await bus.publish("system.heartbeat", {})
+            (await bus.publish("system.heartbeat", {})).unwrap()
             logger.debug("Heartbeat event published")
 
     except asyncio.CancelledError:

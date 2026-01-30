@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Protocol
 
+from app.core.result import Result
+
 
 # Event data structure
 @dataclass(frozen=True)
@@ -20,7 +22,9 @@ EventHandler = Callable[[Event], Awaitable[None]]
 
 # Event Bus abstract interface (Port)
 class IEventBus(Protocol):
-    async def publish(self, topic: str, payload: dict[str, Any]) -> None:
+    async def publish(
+        self, topic: str, payload: dict[str, Any]
+    ) -> Result[None, Exception]:
         """Publish an event."""
         ...
 
@@ -28,6 +32,10 @@ class IEventBus(Protocol):
         """Subscribe to an event topic."""
         ...
 
-    async def start(self) -> None:
+    async def start(self) -> Result[None, Exception]:
         """Start the bus (e.g. start listening for notifications)."""
+        ...
+
+    async def stop(self) -> Result[None, Exception]:
+        """Stop the bus."""
         ...
